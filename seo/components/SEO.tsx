@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import Dashboard from './Dashboard'
 
 export default function SEOChecker() {
   const [url1, setUrl1] = useState('')
@@ -11,7 +10,7 @@ export default function SEOChecker() {
   const [loading, setLoading] = useState(false)
   const [strategy, setStrategy] = useState('mobile')
 
-  // restore stored state
+  
   useEffect(() => {
     const saved = localStorage.getItem('seoCheckerResults')
     if (saved) {
@@ -23,7 +22,7 @@ export default function SEOChecker() {
     }
   }, [])
 
-  // persist state
+  
   useEffect(() => {
     if (results.length > 0) {
       localStorage.setItem(
@@ -33,7 +32,7 @@ export default function SEOChecker() {
     }
   }, [url1, url2, results, strategy])
 
-  // fetch PageSpeed data for one or two urls
+  
   async function checkSEO() {
     setLoading(true)
     setError('')
@@ -89,7 +88,6 @@ export default function SEOChecker() {
 
 
   return (
-    <Dashboard>
       <section className="max-w-5xl mx-auto p-6 bg-white rounded-md shadow-md">
         <h1 className="text-3xl font-bold mb-6 text-gray-900">SEO Checker & Comparison</h1>
 
@@ -164,45 +162,50 @@ export default function SEOChecker() {
           </p>
         )}
 
-        {/* shared issues */}
         {overlap.length > 0 && (
-          <div className="mt-10 p-5 bg-yellow-50 border border-yellow-300 rounded-md">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Shared Issues Between Both Sites</h2>
-            <ul className="list-disc list-inside text-gray-700 space-y-1">
-              {overlap.map((item: any, i: number) => (
-                <li key={i}>
-                  <strong>{item.title}</strong> — You: ~{Math.round(item.savings1)} ms, Competitor: ~{Math.round(item.savings2)} ms
-                  <br />
-                  <small className="text-gray-500">{item.description}</small>
-                </li>
-              ))}
-            </ul>
+        <div className="mt-10 p-5 bg-white border border-gray-200 rounded-md shadow-sm">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Shared Issues Between Both Sites
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full border border-gray-200 rounded-md text-sm">
+              <thead className="bg-gray-100 text-gray-700">
+                <tr>
+                  <th className="px-4 py-2 text-left font-medium border-b border-gray-200">Issue</th>
+                  <th className="px-4 py-2 text-left font-medium border-b border-gray-200">Description</th>
+                  <th className="px-4 py-2 text-left font-medium border-b border-gray-200">Competitor</th>
+                  <th className="px-4 py-2 text-left font-medium border-b border-gray-200">Your Site</th>
+                </tr>
+              </thead>
+              <tbody>
+                {overlap.map((item: any, i: number) => (
+                  <tr key={i} className="hover:bg-gray-50">
+                    <td className="px-4 py-2 font-medium text-gray-800">{item.title}</td>
+                    <td className="px-4 py-2 text-gray-600">{item.description}</td>
+                    <td className="px-4 py-2 text-indigo-700">{Math.round(item.savings1)} ms</td>
+                    <td className="px-4 py-2 text-indigo-700">{Math.round(item.savings2)} ms</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* results panels */}
+
         {results.length > 0 && (
           <div className="mt-8 grid md:grid-cols-2 gap-6">
             {results.map((r, i) => (
-              <ResultPanel key={i} data={r} label={i === 0 ? 'Your Site' : 'Competitor'} overlap={overlap} />
+              <ResultPanel key={i} data={r} label={i === 0 ? 'Your Site' : 'Competitor'} />
             ))}
           </div>
         )}
       </section>
-    </Dashboard>
   )
 }
 
-function ResultPanel({ data, label, overlap }: { data: any; label: string; overlap: any[] }) {
-  const { categories, webVitals, opportunities } = data
-
-  // filter: only opportunities with >0 ms savings and not present in overlap list
-  const visibleOpps = (opportunities || []).filter((opp: any) => {
-    const savings = Number(opp?.details?.overallSavingsMs || 0)
-    const isShared = overlap.some(o => o.title === opp.title)
-    console.log(savings > 0 && !isShared)
-    return savings > 0 && !isShared
-  })
+function ResultPanel({ data, label }: { data: any; label: string }) {
+  const { categories, webVitals } = data
 
   return (
     <div className="bg-indigo-50 p-6 rounded-md border border-gray-200 shadow-sm">
@@ -225,21 +228,6 @@ function ResultPanel({ data, label, overlap }: { data: any; label: string; overl
             <Vital label="TBT" value={webVitals.tbt} emoji="⏱️" />
             <Vital label="CLS" value={webVitals.cls} emoji="🧍" />
           </dl>
-        </section>
-      )}
-
-      {visibleOpps?.length > 0 && (
-        <section className="mt-6 bg-white p-4 rounded-md border border-gray-200">
-          <h3 className="text-lg font-semibold mb-2 text-gray-800">Opportunities to Improve</h3>
-          <ul className="list-disc list-inside space-y-2 text-gray-700">
-            {visibleOpps.map((opp: any, i: number) => (
-              <li key={i}>
-                <strong>{opp.title}</strong> — save ~{Math.round(Number(opp.details?.overallSavingsMs || 0))} ms
-                <br />
-                <small className="text-gray-500">{opp.description}</small>
-              </li>
-            ))}
-          </ul>
         </section>
       )}
     </div>

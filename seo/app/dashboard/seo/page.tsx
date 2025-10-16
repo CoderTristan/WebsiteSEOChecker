@@ -1,9 +1,12 @@
-import SEO from "@/components/SEO";
+import Dashboard from "@/components/Dashboard";
+import Tabs from "@/components/Tabs";
 
 export default function SEOPage() {
   return (
     <div>
-      <SEO />
+      <Dashboard>
+        <Tabs />
+      </Dashboard>
     </div>
   );
 }
